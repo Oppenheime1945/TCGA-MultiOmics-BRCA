@@ -33,14 +33,14 @@ message(">>> [MODULE 1] Fetching TCGA-BRCA Data...")
 local_file <- file.path(data_dir, "TCGA_BRCA_Raw.RData")
 
 if(file.exists(local_file)) {
-  message("✅ Local cache found! Loading data from disk (Instant)...")
+  message("Local cache found! Loading data from disk (Instant)...")
   load(local_file)
 } else {
-  message("⬇️ No local cache found. Downloading from Cloud (This happens only once)...")
+  message("No local cache found. Downloading from Cloud (This happens only once)...")
   mae <- curatedTCGAData(diseaseCode = "BRCA", assays = c("RNASeq2GeneNorm", "miRNASeqGene"), 
                          dry.run = FALSE, version = "2.0.1")
   save(mae, file = local_file)
-  message("✅ Data downloaded and saved to: ", local_file)
+  message("Data downloaded and saved to: ", local_file)
 }
 
 # --- MODULE 2: DATA ALIGNMENT & CLEANING ---
@@ -64,7 +64,7 @@ final_ids        <- target_metadata$shortID
 
 # 4. Remove Duplicates
 if(any(duplicated(final_ids))) {
-  message("⚠️ Warning: Duplicates found. Removing matches...")
+  message("Warning: Duplicates found. Removing matches...")
   keep_unique <- !duplicated(final_ids)
   final_ids <- final_ids[keep_unique]
   target_metadata <- target_metadata[keep_unique, ]
@@ -89,7 +89,7 @@ keep_var_mir <- apply(X_mirna, 1, var) > 0
 X_mrna <- X_mrna[keep_var_rna, ]
 X_mirna <- X_mirna[keep_var_mir, ]
 
-message("✅ Cleaning Complete.")
+message("Cleaning Complete.")
 message("   - Final Patients: ", length(final_ids))
 message("   - Final Genes: ", nrow(X_mrna))
 message("   - Final miRNAs: ", nrow(X_mirna))
@@ -109,7 +109,7 @@ diag(design) <- 0
 MyResult.diablo <- block.splsda(X, Y, ncomp = 2, design = design,
                                 keepX = list(mRNA = c(20, 20), miRNA = c(20, 20)))
 
-message("✅ Model Trained Successfully!")
+message("Model Trained Successfully!")
 
 # --- MODULE 4: VISUALIZATION ---
 message(">>> [MODULE 4] Generating Publication Figures...")
@@ -139,4 +139,4 @@ p4 <- ggplot(long_df, aes(x = Patient, y = Feature, fill = ZScore)) +
 
 ggsave(file.path(output_dir, "Figure4_Integrated_Heatmap.pdf"), p4, width = 12, height = 8)
 
-message("✅ SUCCESS! All figures saved in: ", output_dir)
+message("SUCCESS! All figures saved in: ", output_dir)
